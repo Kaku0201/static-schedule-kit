@@ -65,7 +65,7 @@ https://docs.google.com/spreadsheets/d/여기가시트ID/edit
 
 ### 7. 설정하기
 
-1. - `.env.example` 파일을 참고해서 `.env` 파일을 직접 만들어 사용합니다.
+1. `.env.example` 파일을 참고해서 `.env` 파일을 직접 만들어 사용합니다.
 
 ### 8. GitHub Actions 설정
 
