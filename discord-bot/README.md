@@ -43,10 +43,11 @@
 
 사용 중인 구글시트 주소에서 시트 ID를 복사합니다.
 
-``예시:
+```예시:
 
-   `text`
-`https://docs.google.com/spreadsheets/d/여기가시트ID/edit``
+   text
+https://docs.google.com/spreadsheets/d/여기가시트ID/edit
+```
 
 ### 4. 코드 다운로드
 
