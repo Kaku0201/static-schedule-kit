@@ -8,7 +8,6 @@ import gspread
 from google.oauth2.service_account import Credentials
 
 
-
 DISCORD_BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN", "").strip()
 DISCORD_CHANNEL_ID = os.getenv("DISCORD_CHANNEL_ID", "").strip()
 GOOGLE_SHEET_ID = os.getenv("GOOGLE_SHEET_ID", "").strip()
@@ -18,7 +17,7 @@ TIMEZONE = os.getenv("TIMEZONE", "Asia/Seoul").strip()
 # GitHub Actions에서는 실제 주기가 workflow에서 결정되므로 참고용
 CHECK_INTERVAL_MINUTES = os.getenv("CHECK_INTERVAL_MINUTES", "5").strip()
 
-# 서비스 계정 JSON 전체를 GitHub Secret 또는 .env에 문자열로 넣는 방식
+# 서비스 계정 JSON 전체를 GitHub Secret에 문자열로 넣는 방식
 GOOGLE_SERVICE_ACCOUNT_JSON = os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON", "").strip()
 
 STATE_FILE = Path("sent_records.json")
@@ -94,7 +93,6 @@ def read_participation_rows() -> List[Dict[str, Any]]:
     rows: List[Dict[str, Any]] = []
 
     for row in data_rows:
-        # 길이 보정
         padded = row + [""] * max(0, 11 - len(row))
         date_value = padded[0].strip()
         weekday = padded[1].strip()
@@ -111,8 +109,8 @@ def read_participation_rows() -> List[Dict[str, Any]]:
             if mark.strip().upper() == "O":
                 nickname = nicknames[idx].strip() if idx < len(nicknames) else ""
                 code = codes[idx].strip() if idx < len(codes) else ""
-                participants.append(nickname or code or f"참여자{idx+1}")
-                participant_codes.append(code or f"P{idx+1}")
+                participants.append(nickname or code or f"참여자{idx + 1}")
+                participant_codes.append(code or f"P{idx + 1}")
 
         record_key = make_record_key(
             date_value=date_value,
@@ -145,8 +143,8 @@ def make_record_key(
     return f"{date_value}|{weekday}|{time_value}|{codes}"
 
 
-def build_message(new_rows: List[Dict[str, Any]]) -> str:
-    lines = ["이번 주 공대 일정", ""]
+def build_embed(new_rows: List[Dict[str, Any]]) -> discord.Embed:
+    lines = []
 
     for row in new_rows:
         date_text = row["date"]
@@ -160,12 +158,20 @@ def build_message(new_rows: List[Dict[str, Any]]) -> str:
         if time_value:
             header += f" {time_value}"
 
+        participant_text = ", ".join(participants) if participants else "없음"
+
         lines.append(header)
-        lines.append("참여인원")
-        lines.append(", ".join(participants) if participants else "없음")
+        lines.append(f"참여인원: {participant_text}")
         lines.append("")
 
-    return "\n".join(lines).strip()
+    description = "\n".join(lines).strip()
+
+    embed = discord.Embed(
+        title="이번 주 공대 일정",
+        description=description,
+    )
+    embed.set_footer(text="static-schedule-kit")
+    return embed
 
 
 intents = discord.Intents.default()
@@ -187,12 +193,14 @@ async def on_ready():
             await client.close()
             return
 
+        new_rows.sort(key=lambda x: (x["date"], x["time"]))
+
         channel = client.get_channel(int(DISCORD_CHANNEL_ID))
         if channel is None:
             channel = await client.fetch_channel(int(DISCORD_CHANNEL_ID))
 
-        message = build_message(new_rows)
-        await channel.send(message)
+        embed = build_embed(new_rows)
+        await channel.send(embed=embed)
 
         for row in new_rows:
             sent_records.add(row["record_key"])
