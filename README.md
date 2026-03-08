@@ -38,7 +38,7 @@
 
 ## 사용법 안내
 
-# dicord-bot/README.md 에 자세히 적혀있습니다.
+### dicord-bot/README.md 에 자세히 적혀있습니다.
 
 
 ## 디스코드 알림 안내
