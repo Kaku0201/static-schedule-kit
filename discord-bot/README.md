@@ -3,7 +3,7 @@
 `일정 추합 시트` 구글시트의 `참여인원저장` 시트를 읽어와  
 새로 추가된 일정이 있을 때 디스코드 채널로 자동 전송하는 선택형 알림 도구입니다.
 
-이 문서는 **아예 처음 설정하는 사람 기준**으로,  
+이 문서는 처음 설정하는 사람 기준으로,  
 GitHub 업로드부터 Discord 봇 생성, Google 서비스 계정 생성, GitHub Actions 설정까지 한 번에 설명합니다.
 
 ## 준비물
@@ -21,7 +21,7 @@ GitHub 업로드부터 Discord 봇 생성, Google 서비스 계정 생성, GitHu
 - `bot.py` : 시트를 읽고 디스코드로 보내는 코드
 - `requirements.txt` : 필요한 라이브러리 목록
 - `README.md` : 사용 안내 문서
-- `.github/workflows/` : GitHub Actions 실행 파일
+- `.github/workflows/discord-schedule.yml` : GitHub Actions 실행 파일
 
 ## 전체 진행 순서
 
@@ -30,7 +30,7 @@ GitHub 업로드부터 Discord 봇 생성, Google 서비스 계정 생성, GitHu
 3. Discord 봇을 만듭니다.
 4. Discord 채널 ID를 확인합니다.
 5. Google Cloud에서 서비스 계정을 만듭니다.
-6. Google Sheets API를 활성화합니다.
+6. Google API를 활성화합니다.
 7. 서비스 계정 키(JSON)를 생성합니다.
 8. 구글시트를 서비스 계정 이메일과 공유합니다.
 9. GitHub Secrets를 등록합니다.
@@ -44,16 +44,23 @@ GitHub 업로드부터 Discord 봇 생성, Google 서비스 계정 생성, GitHu
 
 - `discord-bot/bot.py`
 - `discord-bot/requirements.txt`
-- `discord-bot/.env.example`
-- `.github/workflows/`
+- `discord-bot/README.md`
+- `.github/workflows/discord-schedule.yml`
 
 ## 2. Discord 봇 만들기
 
 1. Discord 개발자 포털에서 새 애플리케이션을 만듭니다.
-2. Bot 메뉴에서 봇을 생성합니다.
+2. **Bot** 메뉴에서 봇을 생성합니다.
 3. 봇 토큰을 복사합니다.
-4. OAuth2 / URL Generator에서 봇 초대 링크를 만듭니다.
+4. **OAuth2 / URL Generator**에서 봇 초대 링크를 만듭니다.
 5. 봇을 사용할 서버에 초대합니다.
+
+### 권한 추천
+
+이 도구는 일정 메시지를 채널에 보내는 용도이므로 아래 권한이면 충분합니다.
+
+- `View Channels`
+- `Send Messages`
 
 ## 3. Discord 채널 ID 확인하기
 
@@ -75,10 +82,16 @@ GitHub 업로드부터 Discord 봇 생성, Google 서비스 계정 생성, GitHu
 2. 서비스 계정을 생성합니다.
 3. 서비스 계정 이메일을 확인합니다.
 
-## 6. Google Sheets API 활성화
+## 6. Google API 활성화
 
-1. Google Cloud 콘솔에서 API 라이브러리로 이동합니다.
-2. **Google Sheets API**를 활성화합니다.
+1. Google Cloud 콘솔에서 **API 라이브러리**로 이동합니다.
+2. 아래 두 가지 API를 모두 활성화합니다.
+
+- **Google Sheets API**
+- **Google Drive API**
+
+> 이 도구는 구글시트 내용을 읽을 때 Google Sheets API뿐 아니라 Google Drive API 권한도 함께 사용합니다.  
+> 둘 중 하나라도 비활성화되어 있으면 시트 읽기 과정에서 권한 오류가 발생할 수 있습니다.
 
 ## 7. 서비스 계정 키(JSON) 만들기
 
@@ -99,21 +112,11 @@ GitHub 저장소에서 **Settings → Secrets and variables → Actions**로 들
 
 ### 필수 Secrets
 
-1. Secrets 등록
-
-레포 Settings → Secrets and variables → Actions 에 아래 5개 추가
-
-- DISCORD_BOT_TOKEN
-- DISCORD_CHANNEL_ID
-- GOOGLE_SHEET_ID
-- GOOGLE_WORKSHEET_NAME
-- GOOGLE_SERVICE_ACCOUNT_JSON
-
-2. Actions 권한 확인
-
-레포 Settings → Actions → General에서
-Workflow permissions -> Read and write permissions
-sent_records.json 커밋이 가능
+- `DISCORD_BOT_TOKEN`
+- `DISCORD_CHANNEL_ID`
+- `GOOGLE_SHEET_ID`
+- `GOOGLE_WORKSHEET_NAME`
+- `GOOGLE_SERVICE_ACCOUNT_JSON`
 
 ### 값 설명
 
@@ -131,11 +134,19 @@ sent_records.json 커밋이 가능
   기본값: `참여인원저장`
 
 - `GOOGLE_SERVICE_ACCOUNT_JSON`  
-  서비스 계정 JSON 파일 전체 내용을 한 줄 문자열로 넣은 값
+  서비스 계정 JSON 파일 전체 내용을 그대로 넣은 값
+
+### Actions 권한 설정
+
+레포의 **Settings → Actions → General**에서 아래 항목을 확인합니다.
+
+- **Workflow permissions** → `Read and write permissions`
+
+이 설정이 있어야 `sent_records.json` 파일을 커밋할 수 있습니다.
 
 ## 10. GitHub Actions 실행하기
 
-1. 저장소의 Actions 탭으로 이동합니다.
+1. 저장소의 **Actions** 탭으로 이동합니다.
 2. 워크플로가 보이는지 확인합니다.
 3. 필요하면 수동 실행합니다.
 4. 이후에는 설정한 주기마다 자동으로 실행됩니다.
@@ -158,17 +169,20 @@ sent_records.json 커밋이 가능
 ## 자주 막히는 부분
 
 ### Discord 메시지가 안 보내지는 경우
+
 - 봇 토큰이 잘못되었는지 확인
 - 채널 ID가 맞는지 확인
 - 봇이 해당 채널을 볼 수 있는지 확인
 
 ### 구글시트를 못 읽는 경우
+
 - 시트 ID가 맞는지 확인
 - 워크시트 이름이 맞는지 확인
 - 서비스 계정 이메일이 시트에 공유되어 있는지 확인
-- Google Sheets API가 활성화되어 있는지 확인
+- **Google Sheets API와 Google Drive API가 모두 활성화되어 있는지 확인**
 
 ### GitHub Actions가 안 도는 경우
+
 - Actions가 저장소에서 활성화되어 있는지 확인
 - Secrets 이름이 코드와 정확히 같은지 확인
 - workflow 파일 위치가 맞는지 확인
