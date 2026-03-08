@@ -45,8 +45,8 @@
 
 예시:
 
-   text
-https://docs.google.com/spreadsheets/d/여기가시트ID/edit
+   `text
+https://docs.google.com/spreadsheets/d/여기가시트ID/edit`
 
 ### 4. 코드 다운로드
 
