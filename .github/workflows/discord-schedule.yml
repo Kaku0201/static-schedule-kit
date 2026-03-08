@@ -19,8 +19,6 @@ jobs:
     steps:
       - name: 저장소 가져오기
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Python 설치
         uses: actions/setup-python@v5
