@@ -12,12 +12,6 @@ DISCORD_BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN", "").strip()
 DISCORD_CHANNEL_ID = os.getenv("DISCORD_CHANNEL_ID", "").strip()
 GOOGLE_SHEET_ID = os.getenv("GOOGLE_SHEET_ID", "").strip()
 GOOGLE_WORKSHEET_NAME = os.getenv("GOOGLE_WORKSHEET_NAME", "참여인원저장").strip()
-TIMEZONE = os.getenv("TIMEZONE", "Asia/Seoul").strip()
-
-# GitHub Actions에서는 실제 주기가 workflow에서 결정되므로 참고용
-CHECK_INTERVAL_MINUTES = os.getenv("CHECK_INTERVAL_MINUTES", "5").strip()
-
-# 서비스 계정 JSON 전체를 GitHub Secret에 문자열로 넣는 방식
 GOOGLE_SERVICE_ACCOUNT_JSON = os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON", "").strip()
 
 STATE_FILE = Path("sent_records.json")
@@ -26,11 +20,14 @@ STATE_FILE = Path("sent_records.json")
 def load_sent_records() -> List[str]:
     if not STATE_FILE.exists():
         return []
+
     try:
         with STATE_FILE.open("r", encoding="utf-8") as f:
             data = json.load(f)
+
         if isinstance(data, list):
             return [str(x) for x in data]
+
         return []
     except Exception:
         return []
@@ -64,6 +61,7 @@ def get_gspread_client() -> gspread.Client:
         "https://www.googleapis.com/auth/spreadsheets.readonly",
         "https://www.googleapis.com/auth/drive.readonly",
     ]
+
     credentials = Credentials.from_service_account_info(
         service_account_info,
         scopes=scopes,
@@ -76,7 +74,7 @@ def read_participation_rows() -> List[Dict[str, Any]]:
     spreadsheet = client.open_by_key(GOOGLE_SHEET_ID)
     worksheet = spreadsheet.worksheet(GOOGLE_WORKSHEET_NAME)
 
-    # 1행: 닉네임, 2행: 코드, 3행부터 데이터
+    # 1행: 닉네임 / 2행: 코드 / 3행부터 데이터
     all_values = worksheet.get_all_values()
 
     if len(all_values) < 3:
@@ -86,7 +84,7 @@ def read_participation_rows() -> List[Dict[str, Any]]:
     code_row = all_values[1]
     data_rows = all_values[2:]
 
-    # A 날짜 / B 요일 / C 시간 / D~K 참여여부
+    # A: 날짜 / B: 요일 / C: 시간 / D~K: 참여 여부
     nicknames = nickname_row[3:11]
     codes = code_row[3:11]
 
@@ -94,6 +92,7 @@ def read_participation_rows() -> List[Dict[str, Any]]:
 
     for row in data_rows:
         padded = row + [""] * max(0, 11 - len(row))
+
         date_value = padded[0].strip()
         weekday = padded[1].strip()
         time_value = padded[2].strip()
@@ -109,6 +108,7 @@ def read_participation_rows() -> List[Dict[str, Any]]:
             if mark.strip().upper() == "O":
                 nickname = nicknames[idx].strip() if idx < len(nicknames) else ""
                 code = codes[idx].strip() if idx < len(codes) else ""
+
                 participants.append(nickname or code or f"참여자{idx + 1}")
                 participant_codes.append(code or f"P{idx + 1}")
 
@@ -152,7 +152,7 @@ def build_embed(new_rows: List[Dict[str, Any]]) -> discord.Embed:
         time_value = row["time"]
         participants = row["participants"]
 
-        header = f"{date_text}"
+        header = date_text
         if weekday:
             header += f" ({weekday})"
         if time_value:
@@ -160,18 +160,16 @@ def build_embed(new_rows: List[Dict[str, Any]]) -> discord.Embed:
 
         participant_text = ", ".join(participants) if participants else "없음"
 
-        lines.append(header)
-        lines.append(f"참여인원: {participant_text}")
+        lines.append(f"**• {header}**")
+        lines.append(participant_text)
         lines.append("")
 
     description = "\n".join(lines).strip()
 
-    embed = discord.Embed(
-        title="이번 주 공대 일정",
+    return discord.Embed(
+        title="🔔 이번 주 공대 일정",
         description=description,
     )
-    embed.set_footer(text="static-schedule-kit")
-    return embed
 
 
 intents = discord.Intents.default()
@@ -215,7 +213,7 @@ async def on_ready():
         await client.close()
 
 
-def main():
+def main() -> None:
     validate_env()
     client.run(DISCORD_BOT_TOKEN)
 
