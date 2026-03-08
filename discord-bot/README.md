@@ -20,7 +20,6 @@ GitHub 업로드부터 Discord 봇 생성, Google 서비스 계정 생성, GitHu
 
 - `bot.py` : 시트를 읽고 디스코드로 보내는 코드
 - `requirements.txt` : 필요한 라이브러리 목록
-- `.env.example` : 설정값 예시
 - `README.md` : 사용 안내 문서
 - `.github/workflows/` : GitHub Actions 실행 파일
 
@@ -100,11 +99,21 @@ GitHub 저장소에서 **Settings → Secrets and variables → Actions**로 들
 
 ### 필수 Secrets
 
-- `DISCORD_BOT_TOKEN`
-- `DISCORD_CHANNEL_ID`
-- `GOOGLE_SHEET_ID`
-- `GOOGLE_WORKSHEET_NAME`
-- `GOOGLE_SERVICE_ACCOUNT_JSON`
+1. Secrets 등록
+
+레포 Settings → Secrets and variables → Actions 에 아래 5개 추가
+
+- DISCORD_BOT_TOKEN
+- DISCORD_CHANNEL_ID
+- GOOGLE_SHEET_ID
+- GOOGLE_WORKSHEET_NAME
+- GOOGLE_SERVICE_ACCOUNT_JSON
+
+2. Actions 권한 확인
+
+레포 Settings → Actions → General에서
+Workflow permissions -> Read and write permissions
+sent_records.json 커밋이 가능해.
 
 ### 값 설명
 
