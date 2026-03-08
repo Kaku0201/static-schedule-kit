@@ -5,11 +5,9 @@ from typing import List, Dict, Any
 
 import discord
 import gspread
-from dotenv import load_dotenv
 from google.oauth2.service_account import Credentials
 
 
-load_dotenv()
 
 DISCORD_BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN", "").strip()
 DISCORD_CHANNEL_ID = os.getenv("DISCORD_CHANNEL_ID", "").strip()
