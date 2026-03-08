@@ -113,7 +113,7 @@ GitHub 저장소에서 **Settings → Secrets and variables → Actions**로 들
 
 레포 Settings → Actions → General에서
 Workflow permissions -> Read and write permissions
-sent_records.json 커밋이 가능해.
+sent_records.json 커밋이 가능
 
 ### 값 설명
 
