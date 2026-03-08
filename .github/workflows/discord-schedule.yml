@@ -2,7 +2,7 @@ name: discord-schedule
 
 on:
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "2,7,12,17,22,27,32,37,42,47,52,57 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -51,10 +51,11 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          if git diff --quiet -- discord-bot/sent_records.json; then
+          git add discord-bot/sent_records.json
+
+          if git diff --cached --quiet; then
             echo "변경사항 없음"
           else
-            git add discord-bot/sent_records.json
             git commit -m "Update sent records"
             git push
           fi
