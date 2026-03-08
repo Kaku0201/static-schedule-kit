@@ -63,7 +63,11 @@ https://docs.google.com/spreadsheets/d/여기가시트ID/edit
 - 구글시트 ID
 - 확인 주기
 
-### 6. GitHub Actions 설정
+### 7. 설정하기
+
+1. - `.env.example` 파일을 참고해서 `.env` 파일을 직접 만들어 사용합니다.
+
+### 8. GitHub Actions 설정
 
 이 도구는 GitHub Actions를 이용해 일정 간격으로 자동 실행하는 방식으로 사용합니다.
 
@@ -73,7 +77,7 @@ https://docs.google.com/spreadsheets/d/여기가시트ID/edit
 - GitHub Actions 활성화
 - 필요한 환경 변수 또는 시크릿 등록
 
-### 7. 실행
+### 9. 실행
 
 설정이 끝나면 GitHub Actions가 일정 간격으로 자동 실행됩니다.  
 도구는 구글시트를 확인하고, 새로 추가된 일정이 있으면 디스코드 채널에 전송합니다.
